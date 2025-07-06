@@ -1,0 +1,3 @@
+include ':core'
+include ':p1'
+include ':startup'

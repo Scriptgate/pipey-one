@@ -1,0 +1,18 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.18' apply false
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform(SpringBootPlugin.BOM_COORDINATES)
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation project(':core')
+    implementation 'nl.basjes.iot:stream-record-splitter:0.6'
+    implementation 'nl.basjes.dsmr:dsmr-parser:0.6'
+}

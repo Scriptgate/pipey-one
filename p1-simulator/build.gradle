@@ -13,7 +13,5 @@ dependencies {
     implementation platform(SpringBootPlugin.BOM_COORDINATES)
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation project(':core')
-    implementation project(':backend-for-frontend')
-    implementation 'nl.basjes.iot:stream-record-splitter:0.6'
     implementation 'nl.basjes.dsmr:dsmr-parser:0.6'
 }

@@ -1,3 +1,6 @@
+include ':startup'
 include ':core'
 include ':p1'
-include ':startup'
+include ':p1-simulator'
+include ':backend-for-frontend'
+include ':frontend'

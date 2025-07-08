@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.7.18'
+    alias(libs.plugins.spring.boot)
 }
 
 repositories {
@@ -13,5 +13,39 @@ dependencies {
     implementation platform(SpringBootPlugin.BOM_COORDINATES)
     implementation("org.springframework.boot:spring-boot-starter")
 
+    implementation project(':core')
     implementation project(':p1')
+    implementation project(':p1-simulator')
+    implementation project(':backend-for-frontend')
+    implementation project(':frontend')
+}
+
+def buildClientToSpring = ':frontend:buildClientToSpring'
+
+def bootRepackage = tasks.register('bootRepackage') {
+    group = 'build'
+    dependsOn buildClientToSpring, 'bootJar'
+}
+
+jar.enabled = false
+
+tasks.named('bootJar') {
+    mustRunAfter buildClientToSpring
+}
+tasks.named('bootRunMainClassName') {
+    dependsOn buildClientToSpring
+}
+tasks.named('bootJarMainClassName') {
+    dependsOn buildClientToSpring
+}
+tasks.named('bootRun') {
+    dependsOn bootRepackage
+    standardInput = System.in
+}
+
+tasks.register('bootDist', Copy) {
+    group = 'application'
+    from bootJar
+    into rootProject.layout.buildDirectory.dir('dist')
+    rename { 'pipeyone.jar' }
 }

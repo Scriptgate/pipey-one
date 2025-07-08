@@ -1,0 +1,4 @@
+[plugins]
+
+spring-boot = { id = "org.springframework.boot", version = "2.7.18" }
+node = { id = "com.github.node-gradle.node", version = "7.1.0" }

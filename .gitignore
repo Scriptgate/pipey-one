@@ -1,0 +1,7 @@
+.gradle
+build
+
+.idea
+
+.angular
+node_modules

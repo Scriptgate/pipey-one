@@ -1,7 +1,8 @@
 package net.scriptgate.pi.p1.component;
 
+import net.scriptgate.pi.p1.DsmrService;
 import net.scriptgate.pi.p1.P1;
-import nl.basjes.dsmr.CheckCRC;
+import net.scriptgate.pi.p1.service.DsmrServiceUsingMessagingTemplate;
 import nl.basjes.dsmr.DSMRTelegram;
 import nl.basjes.dsmr.ParseDsmrTelegram;
 import nl.basjes.parse.ReadUTF8RecordStream;
@@ -9,14 +10,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 
 import static nl.basjes.dsmr.CheckCRC.crcIsValid;
 
-@Component
 public class P1UsingSerialPort implements P1, ApplicationRunner {
+
+
+    private final DsmrService service;
+
+    public P1UsingSerialPort(DsmrService service) {
+        this.service = service;
+    }
 
     public static final Logger LOG = LoggerFactory.getLogger(P1UsingSerialPort.class);
 
@@ -49,6 +55,8 @@ public class P1UsingSerialPort implements P1, ApplicationRunner {
                     crcIsValid(value);
                 }
             }
+
+            service.send(dsmrTelegram);
         }
         LOG.info("---------------------- Done ----------------------");
     }

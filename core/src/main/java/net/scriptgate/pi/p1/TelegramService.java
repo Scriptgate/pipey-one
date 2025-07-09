@@ -2,8 +2,8 @@ package net.scriptgate.pi.p1;
 
 import nl.basjes.dsmr.DSMRTelegram;
 
-public interface DsmrService {
+public interface TelegramService {
 
-    void send(DSMRTelegram data);
+    void send(Telegram data);
 
 }

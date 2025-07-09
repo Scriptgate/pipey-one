@@ -1,6 +1,7 @@
 package net.scriptgate.pi.p1.service;
 
-import net.scriptgate.pi.p1.DsmrService;
+import net.scriptgate.pi.p1.Telegram;
+import net.scriptgate.pi.p1.TelegramService;
 import net.scriptgate.pi.p1.data.DSMRTelegramTO;
 import net.scriptgate.pi.p1.data.DSMRTelegramTOBuilder;
 import nl.basjes.dsmr.DSMRTelegram;
@@ -12,15 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class DsmrServiceUsingMessagingTemplate implements DsmrService {
+public class TelegramServiceUsingMessagingTemplate implements TelegramService {
 
     @Autowired private SimpMessagingTemplate template;
 
-    private List<DSMRTelegramTO> cache = new ArrayList<>();
+    private List<Telegram> cache = new ArrayList<>();
 
     @Override
-    public void send(DSMRTelegram data) {
-        cache.add(DSMRTelegramTOBuilder.build(data));
+    public void send(Telegram data) {
+        cache.add(data);
         template.convertAndSend("/dsrm/telegram", cache);
     }
 

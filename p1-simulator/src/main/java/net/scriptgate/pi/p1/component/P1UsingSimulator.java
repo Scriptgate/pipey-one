@@ -1,6 +1,6 @@
 package net.scriptgate.pi.p1.component;
 
-import net.scriptgate.pi.p1.DsmrService;
+import net.scriptgate.pi.p1.TelegramService;
 import net.scriptgate.pi.p1.P1;
 import nl.basjes.dsmr.CheckCRC;
 import nl.basjes.dsmr.ParseDsmrTelegram;
@@ -21,9 +21,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class P1UsingSimulator implements P1, ApplicationRunner {
 
-    private final DsmrService service;
+    private final TelegramService service;
 
-    public P1UsingSimulator(DsmrService service) {
+    public P1UsingSimulator(TelegramService service) {
         this.service = service;
     }
 
@@ -149,7 +149,7 @@ public class P1UsingSimulator implements P1, ApplicationRunner {
                 }
             }
 
-            service.send(ParseDsmrTelegram.parse(dsmrTelegram));
+//            service.send(ParseDsmrTelegram.parse(dsmrTelegram));
             LOG.info("Wrote record for timestamp: " + nowString + broken);
         }
     }

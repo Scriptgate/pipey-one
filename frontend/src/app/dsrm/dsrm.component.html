@@ -1,52 +1,5 @@
 <section class="products">
-    <div class="table-scroll">
-        <table>
-            <thead>
-            <tr>
-                <td>Time</td>
-                <td>Valid</td>
-                <td>Valid CRC</td>
-                <td>Id</td>
-                <td>CRC</td>
-                <td>P1 Version</td>
-                <td>Equipment Id</td>
-                <td>Tariff Indicator</td>
-                <td>Received (Low Tariff)</td>
-                <td>Received (Normal Tariff)</td>
-                <td>Power Received</td>
-                <td>Returned (Low Tariff)</td>
-                <td>Returned (Normal Tariff)</td>
-                <td>Power Returned</td>
-                <td># Power Failures</td>
-                <td># Long Power Failures</td>
-            </tr>
-            </thead>
-            <tbody>
-            @for (telegram of telegrams$ | async; track telegram.ident) {
-            <tr class="telegram">
-                <td>{{ telegram.timestamp }}</td>
-                <td>{{ telegram.valid }}</td>
-                <td>{{ telegram.validCRC }}</td>
-                <td>{{ telegram.ident }}</td>
-                <td>{{ telegram.crc }}</td>
-                <td>{{ telegram.p1Version }}</td>
-                <td>{{ telegram.equipmentId }}</td>
-                <td>{{ telegram.electricityTariffIndicator }}</td>
-                <td>{{ telegram.electricityReceivedLowTariff }} kWh</td>
-                <td>{{ telegram.electricityReceivedNormalTariff }} kWh</td>
-                <td>{{ telegram.electricityPowerReceived }} kW</td>
-                <td>{{ telegram.electricityReturnedLowTariff }} kWh</td>
-                <td>{{ telegram.electricityReturnedNormalTariff }} kWh</td>
-                <td>{{ telegram.electricityPowerReturned }} kW</td>
-                <td>{{ telegram.powerFailures }}</td>
-                <td>{{ telegram.longPowerFailures }}</td>
-            </tr>
-            } @empty {
-            <tr class="empty">
-                <td>empty</td>
-            </tr>
-            }
-            </tbody>
-        </table>
+    <div class="chart-container">
+        <canvas  id="MyChart" >{{ chart }}</canvas>
     </div>
 </section>

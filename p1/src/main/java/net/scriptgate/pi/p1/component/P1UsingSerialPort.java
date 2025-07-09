@@ -1,65 +1,138 @@
 package net.scriptgate.pi.p1.component;
 
-import net.scriptgate.pi.p1.DsmrService;
+import com.fazecast.jSerialComm.SerialPort;
+import net.scriptgate.pi.p1.Telegram;
+import net.scriptgate.pi.p1.TelegramService;
 import net.scriptgate.pi.p1.P1;
-import net.scriptgate.pi.p1.service.DsmrServiceUsingMessagingTemplate;
-import nl.basjes.dsmr.DSMRTelegram;
-import nl.basjes.dsmr.ParseDsmrTelegram;
-import nl.basjes.parse.ReadUTF8RecordStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static nl.basjes.dsmr.CheckCRC.crcIsValid;
+import static java.util.Map.entry;
 
 public class P1UsingSerialPort implements P1, ApplicationRunner {
 
+    static final String SERIAL_PORT = "/dev/ttyUSB0";
+    static final boolean DEBUG = false;
 
-    private final DsmrService service;
+    private final TelegramService service;
 
-    public P1UsingSerialPort(DsmrService service) {
+    public P1UsingSerialPort(TelegramService service) {
         this.service = service;
     }
 
     public static final Logger LOG = LoggerFactory.getLogger(P1UsingSerialPort.class);
 
-
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        LOG.info("Opening stream /dev/ttyUSB0");
-        FileInputStream inputStream = new FileInputStream("/dev/ttyUSB0");
+        try {
+            SerialPort port = SerialPort.getCommPort(SERIAL_PORT);
+            port.setBaudRate(115200);
+            port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
 
-        ReadUTF8RecordStream reader = new ReadUTF8RecordStream(inputStream, "\r\n![0-9A-F]{4}\r\n");
-
-        String value;
-        int count = 0;
-        while ((value = reader.read())!= null) {
-            if (value.length() < 8) {
-                continue;
+            if (!port.openPort()) {
+                LOG.info("Failed to open serial port.");
+                return;
             }
 
-            DSMRTelegram dsmrTelegram = ParseDsmrTelegram.parse(value);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(port.getInputStream()));
+            List<String> telegram = new ArrayList<>();
 
-            count++;
-            boolean valid = crcIsValid(value);
-            LOG.info("{}: {} {} --> {}",
-                    count,
-                    dsmrTelegram.getTimestamp(),
-                    value.substring(value.length()-7, value.length()-2),
-                    dsmrTelegram.isValidCRC() ? "Ok" : "BAD");
-            if (value.startsWith("/")) {
-                if (!valid) {
-                    crcIsValid(value);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (DEBUG) {
+                    LOG.info("Reading: {}", line);
+                }
+                if (line.startsWith("/")) {
+                    telegram.clear();
+                }
+
+                telegram.add(line);
+
+                if (line.contains("!")) {
+                    if (checkCRC(telegram)) {
+                        service.send(parseTelegram(telegram));
+                    } else if (DEBUG) {
+                        LOG.info("CRC check failed.");
+                    }
                 }
             }
-
-            service.send(dsmrTelegram);
+            port.closePort();
+        } catch (Exception e) {
+            LOG.error("Something went wrong...", e);
         }
-        LOG.info("---------------------- Done ----------------------");
     }
 
+    private boolean checkCRC(List<String> telegramLines) {
+        boolean crcValid = CheckCRC.crcIsValid(String.join("\r\n", telegramLines));
+        if (!crcValid) {
+            LOG.warn("CRC not valid");
+        }
+        return crcValid;
+    }
 
+    private Telegram parseTelegram(List<String> telegram) {
+        Map<Obis, Object> values = new HashMap<>();
+        for (String line : telegram) {
+            parseLine(line, values);
+        }
+        return new TelegramFromMap(values);
+    }
+
+    private void parseLine(String line, Map<Obis, Object> telegram) {
+        if (DEBUG) {
+            LOG.info("Parsing: {}", line);
+        }
+        String obis = line.contains("(") ? line.substring(0, line.indexOf('(')) : "";
+
+        if (Obis.hasCode(obis)) {
+            Matcher matcher = Pattern.compile("\\((.*?)\\)").matcher(line);
+            List<String> values = new ArrayList<>();
+            while (matcher.find()) values.add(matcher.group(1));
+
+            if (!values.isEmpty()) {
+                String rawValue = values.get(values.size() - 1);
+                String unit = "";
+                double value;
+
+                try {
+                    if (obis.contains("96.1.1")) {
+                        // Decode hexadecimal serial number
+                        StringBuilder ascii = new StringBuilder();
+                        for (int i = 0; i < rawValue.length(); i += 2) {
+                            ascii.append((char) Integer.parseInt(rawValue.substring(i, i + 2), 16));
+                        }
+                        telegram.put(Obis.byCode(obis), ascii.toString());
+                        return;
+                    } else if (rawValue.contains("*")) {
+                        String[] parts = rawValue.split("\\*");
+                        value = Double.parseDouble(parts[0]);
+                        unit = parts.length > 1 ? parts[1] : "";
+                    } else if(rawValue.endsWith("S")) {
+                        // Decode timestamp
+                        telegram.put(Obis.byCode(obis), TimestampParser.parse(rawValue));
+                        return;
+                    } else {
+                        value = Double.parseDouble(rawValue);
+                    }
+                    //todo: use unit
+                    telegram.put(Obis.byCode(obis), String.valueOf(value));
+                } catch (Exception e) {
+                    if (DEBUG) {
+                        LOG.info("Error parsing line: {}", e.getMessage());
+                    }
+                }
+            }
+        }
+    }
 }

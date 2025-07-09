@@ -6,8 +6,11 @@ plugins {
 }
 
 dependencies {
+    //TODO: why is this api in pi-shop?
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
     implementation platform(SpringBootPlugin.BOM_COORDINATES)
-    implementation 'org.springframework.boot:spring-boot-starter'
     implementation project(':core')
-    implementation project(':parser')
+
+    runtimeOnly 'com.h2database:h2'
 }

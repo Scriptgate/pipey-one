@@ -1,9 +1,9 @@
 import {Routes} from '@angular/router';
-import {DsrmComponent} from './dsrm/dsrm.component';
+import {TelegramComponent} from './telegram/telegram.component';
 const routeConfig: Routes = [
   {
     path: '',
-    component: DsrmComponent,
+    component: TelegramComponent,
     title: 'PiP1',
   }
 ];

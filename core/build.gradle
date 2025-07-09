@@ -1,11 +1,3 @@
 plugins {
     id 'java'
 }
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation 'nl.basjes.dsmr:dsmr-parser:0.6'
-}

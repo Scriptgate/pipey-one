@@ -1,8 +1,8 @@
-package net.scriptgate.pi.p1.component;
+package net.scriptgate.pi.p1.adapter;
 
 import com.fazecast.jSerialComm.SerialPort;
-import net.scriptgate.pi.p1.TelegramService;
-import net.scriptgate.pi.p1.P1;
+import net.scriptgate.pi.p1.ports.TelegramService;
+import net.scriptgate.pi.p1.ports.P1;
 import net.scriptgate.pi.p1.parser.CheckCRC;
 import net.scriptgate.pi.p1.parser.service.TelegramParser;
 import org.slf4j.Logger;
@@ -58,7 +58,7 @@ public class P1UsingSerialPort implements P1, ApplicationRunner {
 
                 if (line.contains("!")) {
                     if (CheckCRC.crcIsValid(telegram)) {
-                        service.send(parser.parse(telegram));
+                        service.broadcast(parser.parse(telegram));
                     } else {
                         LOG.warn("CRC check failed.");
                     }

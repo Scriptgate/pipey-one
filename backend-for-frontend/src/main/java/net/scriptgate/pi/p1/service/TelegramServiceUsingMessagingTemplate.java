@@ -1,10 +1,8 @@
 package net.scriptgate.pi.p1.service;
 
 import net.scriptgate.pi.p1.Telegram;
-import net.scriptgate.pi.p1.TelegramService;
-import net.scriptgate.pi.p1.data.DSMRTelegramTO;
-import net.scriptgate.pi.p1.data.DSMRTelegramTOBuilder;
-import nl.basjes.dsmr.DSMRTelegram;
+import net.scriptgate.pi.p1.ports.TelegramRepository;
+import net.scriptgate.pi.p1.ports.TelegramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -15,14 +13,21 @@ import java.util.List;
 @Service
 public class TelegramServiceUsingMessagingTemplate implements TelegramService {
 
-    @Autowired private SimpMessagingTemplate template;
+    private SimpMessagingTemplate template;
+    private TelegramRepository repository;
 
-    private List<Telegram> cache = new ArrayList<>();
+    public TelegramServiceUsingMessagingTemplate(
+            SimpMessagingTemplate template,
+            TelegramRepository repository
+    ) {
+        this.template = template;
+        this.repository = repository;
+    }
 
     @Override
-    public void send(Telegram data) {
-        cache.add(data);
-        template.convertAndSend("/dsrm/telegram", cache);
+    public void broadcast(Telegram data) {
+        repository.save(data);
+        template.convertAndSend("/p1/telegram", repository.list());
     }
 
 }

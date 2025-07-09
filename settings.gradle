@@ -1,5 +1,6 @@
 include ':startup'
 include ':core'
+include ':database'
 include ':p1'
 include ':p1-simulator'
 include ':parser'

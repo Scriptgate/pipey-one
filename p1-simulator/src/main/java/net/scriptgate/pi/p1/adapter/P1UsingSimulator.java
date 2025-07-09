@@ -1,7 +1,7 @@
-package net.scriptgate.pi.p1.component;
+package net.scriptgate.pi.p1.adapter;
 
-import net.scriptgate.pi.p1.TelegramService;
-import net.scriptgate.pi.p1.P1;
+import net.scriptgate.pi.p1.ports.TelegramService;
+import net.scriptgate.pi.p1.ports.P1;
 import net.scriptgate.pi.p1.parser.CheckCRC;
 import net.scriptgate.pi.p1.parser.service.TelegramParser;
 import org.slf4j.Logger;
@@ -77,7 +77,7 @@ public class P1UsingSimulator implements P1, ApplicationRunner {
             double sin3 = Math.sin(epochMillis / sinPeriodScaler * 1.2);
             double sin4 = Math.sin(epochMillis / sinPeriodScaler * 1.3);
 
-            String dsmrTelegram =
+            String telegram =
                     "/ISk5\\2MT382-1000 FAKE\r\n" +
                             "\r\n" +
                             "1-3:0.2.8(50)\r\n" +                 // DSMR Version
@@ -137,25 +137,29 @@ public class P1UsingSimulator implements P1, ApplicationRunner {
 
                             "!FFFF\r\n";
 
-            dsmrTelegram =  CheckCRC.fixCrc(dsmrTelegram);
+            telegram =  CheckCRC.fixCrc(telegram);
 
             // Now we periodically break records by cutting off the head or the tail
             String broken = "";
             breakCounter++;
             if (breakCounter % 5 == 0) {
-                int cutAtChar = dsmrTelegram.length()/2;
+                int cutAtChar = telegram.length()/2;
                 if (breakCounter % 10 == 0) {
                     // Cut off the head
-                    dsmrTelegram = dsmrTelegram.substring(cutAtChar);
+                    telegram = telegram.substring(cutAtChar);
                     broken = "--> Broken: Missing HEAD";
                 } else {
                     // Cut off the tail
-                    dsmrTelegram = dsmrTelegram.substring(0, cutAtChar);
+                    telegram = telegram.substring(0, cutAtChar);
                     broken = "--> Broken: Missing TAIL";
                 }
             }
 
-            service.send(parser.parse(Arrays.stream(dsmrTelegram.split("\r\n")).collect(Collectors.toList())));
+            if (CheckCRC.crcIsValid(telegram)) {
+                service.broadcast(parser.parse(Arrays.stream(telegram.split("\r\n")).collect(Collectors.toList())));
+            } else {
+                LOG.warn("CRC check failed.");
+            }
             LOG.info("Wrote record for timestamp: {} {}", nowString,  broken);
         }
     }

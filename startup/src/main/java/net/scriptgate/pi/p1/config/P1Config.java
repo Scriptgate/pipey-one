@@ -1,9 +1,9 @@
 package net.scriptgate.pi.p1.config;
 
-import net.scriptgate.pi.p1.TelegramService;
-import net.scriptgate.pi.p1.P1;
-import net.scriptgate.pi.p1.component.P1UsingSerialPort;
-import net.scriptgate.pi.p1.component.P1UsingSimulator;
+import net.scriptgate.pi.p1.ports.TelegramService;
+import net.scriptgate.pi.p1.ports.P1;
+import net.scriptgate.pi.p1.adapter.P1UsingSerialPort;
+import net.scriptgate.pi.p1.adapter.P1UsingSimulator;
 import net.scriptgate.pi.p1.parser.service.TelegramParser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

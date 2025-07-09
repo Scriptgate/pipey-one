@@ -7,13 +7,13 @@ import {map} from "rxjs/operators";
 import Chart from 'chart.js/auto';
 
 @Component({
-    selector: 'app-dsrm',
+    selector: 'app-telegram',
     imports: [CommonModule],
-    templateUrl: './dsrm.component.html',
-    styleUrls: ['./dsrm.component.css'],
+    templateUrl: './telegram.component.html',
+    styleUrls: ['./telegram.component.css'],
     standalone: true
 })
-export class DsrmComponent {
+export class TelegramComponent {
     public telegrams$ : Observable<Telegram[]> = of([]);
     public chart: any;
 
@@ -23,7 +23,7 @@ export class DsrmComponent {
         let stompClient = this.webSocketService.connect();
 
         stompClient.connect({}, (frame: any) => {
-            stompClient.subscribe('/dsrm/telegram', (data: any) => {
+            stompClient.subscribe('/p1/telegram', (data: any) => {
                 console.log("Receiving data from socket");
                 let telegrams: Telegram[] = JSON.parse(data.body);
                 this.telegrams$ = of(telegrams);

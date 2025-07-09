@@ -53,7 +53,10 @@ export class DsrmComponent {
                         ]
                     },
                     options: {
-                        aspectRatio:2.5
+                        aspectRatio: 2.5,
+                        animation: {
+                            duration: 0
+                        }
                     }
                 });
             });

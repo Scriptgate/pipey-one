@@ -1,5 +1,6 @@
-package net.scriptgate.pi.p1.component;
+package net.scriptgate.pi.p1.parser;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,6 +97,10 @@ public final class CheckCRC {
 
         String actualCrc = String.format("%04X", calculatedCrc(telegram.getBytes(UTF_8)));
         return telegram + actualCrc + "\r\n";
+    }
+
+    public static boolean crcIsValid(List<String> input) {
+        return crcIsValid(String.join("\r\n", input));
     }
 
     public static boolean crcIsValid(String input) {

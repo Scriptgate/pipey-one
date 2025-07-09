@@ -2,8 +2,8 @@ package net.scriptgate.pi.p1.component;
 
 import net.scriptgate.pi.p1.TelegramService;
 import net.scriptgate.pi.p1.P1;
-import nl.basjes.dsmr.CheckCRC;
-import nl.basjes.dsmr.ParseDsmrTelegram;
+import net.scriptgate.pi.p1.parser.CheckCRC;
+import net.scriptgate.pi.p1.parser.service.TelegramParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -21,9 +22,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class P1UsingSimulator implements P1, ApplicationRunner {
 
+    private final TelegramParser parser;
     private final TelegramService service;
 
-    public P1UsingSimulator(TelegramService service) {
+    public P1UsingSimulator(
+            TelegramParser parser,
+            TelegramService service
+    ) {
+        this.parser = parser;
         this.service = service;
     }
 
@@ -149,8 +155,8 @@ public class P1UsingSimulator implements P1, ApplicationRunner {
                 }
             }
 
-//            service.send(ParseDsmrTelegram.parse(dsmrTelegram));
-            LOG.info("Wrote record for timestamp: " + nowString + broken);
+            service.send(parser.parse(Arrays.stream(dsmrTelegram.split("\r\n")).collect(Collectors.toList())));
+            LOG.info("Wrote record for timestamp: {} {}", nowString,  broken);
         }
     }
 

@@ -4,6 +4,7 @@ import net.scriptgate.pi.p1.TelegramService;
 import net.scriptgate.pi.p1.P1;
 import net.scriptgate.pi.p1.component.P1UsingSerialPort;
 import net.scriptgate.pi.p1.component.P1UsingSimulator;
+import net.scriptgate.pi.p1.parser.service.TelegramParser;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -11,22 +12,28 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class P1Config {
 
-    private final TelegramService dsrmService;
 
-    public P1Config(TelegramService dsrmService) {
-        this.dsrmService = dsrmService;
+    private final TelegramParser parser;
+    private final TelegramService service;
+
+    public P1Config(
+            TelegramParser parser,
+            TelegramService service
+    ) {
+        this.parser = parser;
+        this.service = service;
     }
 
     @Bean
     @Profile("production")
     public P1 p1UsingSerialPort() {
-        return new P1UsingSerialPort(dsrmService);
+        return new P1UsingSerialPort(parser, service);
     }
 
     @Bean
     @Profile("test")
     public P1 p1UsingSimulator() {
-        return new P1UsingSimulator(dsrmService);
+        return new P1UsingSimulator(parser, service);
     }
 
 }

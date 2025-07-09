@@ -1,4 +1,4 @@
-package net.scriptgate.pi.p1.component;
+package net.scriptgate.pi.p1.parser;
 
 import java.util.Arrays;
 
@@ -40,7 +40,7 @@ public enum Obis {
         return byCode(code) != null;
     }
 
-    static Obis byCode(String obisCode) {
+    public static Obis byCode(String obisCode) {
         return Arrays.stream(values()).filter(obis -> obis.code.equals(obisCode)).findFirst().orElse(null);
     }
 }

@@ -1,4 +1,4 @@
-package net.scriptgate.pi.p1.component;
+package net.scriptgate.pi.p1.parser;
 
 import net.scriptgate.pi.p1.Telegram;
 

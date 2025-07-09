@@ -13,5 +13,5 @@ dependencies {
     implementation platform(SpringBootPlugin.BOM_COORDINATES)
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation project(':core')
-    implementation 'nl.basjes.dsmr:dsmr-parser:0.6'
+    implementation project(':parser')
 }

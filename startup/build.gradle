@@ -16,6 +16,7 @@ dependencies {
     implementation project(':core')
     implementation project(':p1')
     implementation project(':p1-simulator')
+    implementation project(':parser')
     implementation project(':backend-for-frontend')
     implementation project(':frontend')
 }

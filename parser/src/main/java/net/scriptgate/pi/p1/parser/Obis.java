@@ -28,7 +28,8 @@ public enum Obis {
     L1_CURRENT("1-0:31.7.0"),
     L2_CURRENT("1-0:51.7.0"),
     L3_CURRENT("1-0:71.7.0"),
-    GAS_CONSUMPTION("0-1:24.2.3");
+    GAS_CONSUMPTION("0-1:24.2.3"),
+    NULL("");
 
     private String code;
 
@@ -41,6 +42,18 @@ public enum Obis {
     }
 
     public static Obis byCode(String obisCode) {
-        return Arrays.stream(values()).filter(obis -> obis.code.equals(obisCode)).findFirst().orElse(null);
+        return Arrays.stream(values()).filter(obis -> obis.code.equals(obisCode)).findFirst().orElse(NULL);
+    }
+
+    public boolean exists() {
+        return this != NULL;
+    }
+
+    public boolean containsHex() {
+        return code.contains("96.1.1");
+    }
+
+    public boolean isRate() {
+        return this == CURRENT_RATE;
     }
 }

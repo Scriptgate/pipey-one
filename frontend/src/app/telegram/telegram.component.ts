@@ -15,7 +15,8 @@ import Chart from 'chart.js/auto';
 })
 export class TelegramComponent {
     public telegrams$ : Observable<Telegram[]> = of([]);
-    public chart: any;
+    public totalConsumptionRateChart: any;
+    public l1ConsumptionChart: any;
 
     webSocketService = inject(WebSocketService);
 
@@ -27,10 +28,37 @@ export class TelegramComponent {
                 console.log("Receiving data from socket");
                 let telegrams: Telegram[] = JSON.parse(data.body);
                 this.telegrams$ = of(telegrams);
-                if(this.chart) {
-                    this.chart.destroy();
+                if(this.totalConsumptionRateChart) {
+                    this.totalConsumptionRateChart.destroy();
                 }
-                this.chart = new Chart("MyChart", {
+                this.totalConsumptionRateChart = new Chart("TotalConsumptionRate", {
+                    type: 'line',
+                    data: {
+                        labels: telegrams.map(telegram => telegram.timestamp),
+                        datasets: [
+                            {
+                                label: "Total Consumption Day Rate",
+                                data: telegrams.map(telegram => telegram.totalConsumptionDayRate),
+                                backgroundColor: 'yellow'
+                            },
+                            {
+                                label: "Total Consumption Night Rate",
+                                data: telegrams.map(telegram => telegram.totalConsumptionNightRate),
+                                backgroundColor: 'grey'
+                            }
+                        ]
+                    },
+                    options: {
+                        aspectRatio: 2.5,
+                        animation: {
+                            duration: 0
+                        }
+                    }
+                });
+                if(this.l1ConsumptionChart) {
+                    this.l1ConsumptionChart.destroy();
+                }
+                this.l1ConsumptionChart = new Chart("l1Consumption", {
                     type: 'line',
                     data: {
                         labels: telegrams.map(telegram => telegram.timestamp),
@@ -39,16 +67,6 @@ export class TelegramComponent {
                                 label: "L1 consumption",
                                 data: telegrams.map(telegram => telegram.l1Consumption),
                                 backgroundColor: 'red'
-                            },
-                            {
-                                label: "L2 consumption",
-                                data: telegrams.map(telegram => telegram.l2Consumption),
-                                backgroundColor: 'blue'
-                            },
-                            {
-                                label: "L3 consumption)",
-                                data: telegrams.map(telegram => telegram.l3Consumption),
-                                backgroundColor: 'limegreen'
                             }
                         ]
                     },

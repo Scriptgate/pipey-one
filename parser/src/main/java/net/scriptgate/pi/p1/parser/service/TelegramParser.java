@@ -1,6 +1,9 @@
 package net.scriptgate.pi.p1.parser.service;
 
+import net.scriptgate.pi.p1.Quantity;
+import net.scriptgate.pi.p1.Rate;
 import net.scriptgate.pi.p1.Telegram;
+import net.scriptgate.pi.p1.Unit;
 import net.scriptgate.pi.p1.parser.Obis;
 import net.scriptgate.pi.p1.parser.TelegramFromMap;
 import net.scriptgate.pi.p1.parser.TimestampParser;
@@ -30,12 +33,14 @@ public class TelegramParser {
 
     private void parseLine(String line, Map<Obis, Object> telegram) {
         LOG.debug("Parsing: {}", line);
-        String obis = line.contains("(") ? line.substring(0, line.indexOf('(')) : "";
+        Obis obis = Obis.byCode(line.contains("(") ? line.substring(0, line.indexOf('(')) : "");
 
-        if (Obis.hasCode(obis)) {
+        if (obis.exists()) {
             Matcher matcher = Pattern.compile("\\((.*?)\\)").matcher(line);
             List<String> values = new ArrayList<>();
-            while (matcher.find()) values.add(matcher.group(1));
+            while (matcher.find()) {
+                values.add(matcher.group(1));
+            }
 
             if (!values.isEmpty()) {
                 String rawValue = values.get(values.size() - 1);
@@ -43,27 +48,26 @@ public class TelegramParser {
                 double value;
 
                 try {
-                    if (obis.contains("96.1.1")) {
-                        // Decode hexadecimal serial number
+                    if (obis.containsHex()) {
                         StringBuilder ascii = new StringBuilder();
                         for (int i = 0; i < rawValue.length(); i += 2) {
                             ascii.append((char) Integer.parseInt(rawValue.substring(i, i + 2), 16));
                         }
-                        telegram.put(Obis.byCode(obis), ascii.toString());
-                        return;
+                        telegram.put(obis, ascii.toString());
                     } else if (rawValue.contains("*")) {
                         String[] parts = rawValue.split("\\*");
                         value = Double.parseDouble(parts[0]);
                         unit = parts.length > 1 ? parts[1] : "";
-                    } else if(rawValue.endsWith("S")) {
-                        // Decode timestamp
-                        telegram.put(Obis.byCode(obis), TimestampParser.parse(rawValue));
-                        return;
+                        telegram.put(obis, new Quantity(value, Unit.from(unit)));
+                    } else if(rawValue.endsWith("S") || rawValue.endsWith("W")) {
+                        telegram.put(obis, TimestampParser.parse(rawValue));
+                    } else if(obis.isRate()) {
+                        telegram.put(obis, Rate.from(Integer.parseInt(rawValue)));
                     } else {
                         value = Double.parseDouble(rawValue);
+                        telegram.put(obis, new Quantity(value, Unit.from(unit)));
                     }
-                    //todo: use unit
-                    telegram.put(Obis.byCode(obis), String.valueOf(value));
+
                 } catch (Exception e) {
                     LOG.debug("Error parsing line: {}", e.getMessage(), e);
                 }

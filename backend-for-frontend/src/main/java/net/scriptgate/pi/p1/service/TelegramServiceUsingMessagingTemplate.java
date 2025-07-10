@@ -1,6 +1,8 @@
 package net.scriptgate.pi.p1.service;
 
 import net.scriptgate.pi.p1.Telegram;
+import net.scriptgate.pi.p1.model.TelegramTO;
+import net.scriptgate.pi.p1.model.TelegramTOBuilder;
 import net.scriptgate.pi.p1.ports.TelegramRepository;
 import net.scriptgate.pi.p1.ports.TelegramService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TelegramServiceUsingMessagingTemplate implements TelegramService {
@@ -27,7 +30,7 @@ public class TelegramServiceUsingMessagingTemplate implements TelegramService {
     @Override
     public void broadcast(Telegram data) {
         repository.save(data);
-        template.convertAndSend("/p1/telegram", repository.list());
+        template.convertAndSend("/p1/telegram", repository.list().stream().map(TelegramTOBuilder::telegramTO).collect(Collectors.toList()));
     }
 
 }
